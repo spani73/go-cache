@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+const SIZE = 5
 
 type Node struct {
 	Left *Node
@@ -41,6 +42,51 @@ func (c *Cache) Check(str string){
 	c.Hash[str] = node
 }
 
+func (c *Cache) Remove(n *Node) *Node{
+	fmt.Printf("remove: %s\n",n.Val)
+	left := n.Left
+	right := n.Right
+
+	left.Right = right
+	right.Left = left
+	c.Queue.Length -= 1
+	delete(c.Hash,n.Val)
+	return n
+}
+
+func (c *Cache) Add(n *Node) {
+	fmt.Printf("Add: %s\n" , n.Val)
+	tmp := c.Queue.Head.Right
+	c.Queue.Head.Right = n
+	n.Left = c.Queue.Head
+	n.Right = tmp
+	tmp.Left = n
+
+	c.Queue.Length++
+	if c.Queue.Length > SIZE  {
+		c.Remove(c.Queue.Tail.Left)
+	}
+}
+
+
+func (c *Cache) Display(){
+	c.Queue.Display()
+}
+
+func (q *Queue) Display(){
+	node := q.Head.Right
+	fmt.Printf("%d - [" , q.Length)
+	for i:=0 ; i < q.Length ; i++ {
+		fmt.Printf("{%s}" ,node.Val)
+		if i < q.Length - 1 {
+			fmt.Printf("<-->")
+		}
+		node = node.Right
+	}
+	fmt.Println("]")
+
+}
+
 
 func NewQueue() Queue{
 	head:= &Node{}
@@ -59,9 +105,9 @@ func NewQueue() Queue{
 
 
 func main(){
-	fmt.Println("START CACHE")
+	fmt.Println("START LEAST RECENTLY USED CACHE USING DLL")
 	cache := NewCache()
-	for _,word := range []string{""}{
+	for _,word := range []string{"trees" , "avocado" , "orange", "trees" , "apples" , "honey" , "nectar"}{
 		cache.Check(word)
 		cache.Display()
 	}
